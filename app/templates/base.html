@@ -13,6 +13,7 @@
       <ul><li><strong>{{ app_name }}</strong></li></ul>
       {% if user %}
       <ul>
+        <li><a href="/productos">Productos</a></li>
         <li>{{ user.nombre }} ({{ user.rol.value }})</li>
         <li>
           <form method="post" action="/logout" style="margin:0">

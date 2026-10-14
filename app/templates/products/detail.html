@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ producto.nombre }} · {{ app_name }}{% endblock %}
+{% block content %}
+{% set es_admin = user.rol.value == "admin" %}
+<p><a href="/productos">← Productos</a></p>
+<h1>{{ producto.nombre }} <small>({{ producto.sku }})</small></h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+
+<h2>Unidades de venta</h2>
+<figure>
+<table>
+  <thead><tr><th>Unidad</th><th>Equivale a</th><th>Precio de lista</th>{% if es_admin %}<th></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for u in producto.unidades %}
+    <tr>
+      <td>{{ u.nombre }}</td>
+      <td>
+        {% if u.tipo.value == "base" %}unidad base
+        {% elif u.tipo.value == "caja" %}{{ u.piezas_por_unidad }} {{ producto.unidad_base }}(s)
+        {% else %}{{ "%.4f"|format(producto.m2_por_pieza) if producto.m2_por_pieza else "—" }} m² por {{ producto.unidad_base }}, se redondea a piezas completas
+        {% endif %}
+      </td>
+      {% if es_admin %}
+      <td>
+        <form method="post" action="/productos/{{ producto.id }}/unidades/{{ u.id }}/precio" style="display:flex;gap:.5rem;margin:0">
+          <input name="precio" inputmode="decimal" value="{{ '%.2f'|format(u.precio_lista) }}" style="margin:0">
+          <button type="submit" style="margin:0">Guardar</button>
+        </form>
+      </td>
+      <td>
+        {% if u.tipo.value != "base" %}
+        <form method="post" action="/productos/{{ producto.id }}/unidades/{{ u.id }}/eliminar" style="margin:0">
+          <button type="submit" class="secondary outline" style="margin:0">Quitar</button>
+        </form>
+        {% endif %}
+      </td>
+      {% else %}
+      <td>S/ {{ "%.2f"|format(u.precio_lista) }}</td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+
+{% if es_admin %}
+<details>
+  <summary role="button" class="outline">Agregar unidad de venta</summary>
+  <form method="post" action="/productos/{{ producto.id }}/unidades">
+    <div class="grid">
+      <label>Tipo
+        <select name="tipo">
+          <option value="caja">Caja (N piezas)</option>
+          {% if producto.m2_por_pieza %}<option value="area">Metro cuadrado (m²)</option>{% endif %}
+        </select>
+      </label>
+      <label>Nombre (para caja) <input name="nombre" placeholder="caja"></label>
+      <label>Piezas por caja <input name="piezas_por_unidad" inputmode="numeric"></label>
+      <label>Precio (S/) <input name="precio" inputmode="decimal" required></label>
+    </div>
+    <button type="submit">Agregar</button>
+  </form>
+</details>
+
+<h2>Datos del producto</h2>
+<form method="post" action="/productos/{{ producto.id }}/editar">
+  <label>Nombre <input name="nombre" value="{{ producto.nombre }}" required></label>
+  <div class="grid">
+    <label>Categoría
+      <select name="categoria">
+        {% for c in categorias %}<option{% if producto.categoria == c %} selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Costo por {{ producto.unidad_base }} (S/)
+      <input name="costo" inputmode="decimal" value="{{ '%.2f'|format(producto.costo) }}">
+    </label>
+    <label>Stock mínimo
+      <input name="stock_minimo" inputmode="numeric" value="{{ producto.stock_minimo }}">
+    </label>
+  </div>
+  <label>m² por pieza
+    <input name="m2_por_pieza" inputmode="decimal" value="{{ producto.m2_por_pieza if producto.m2_por_pieza else '' }}">
+  </label>
+  <label><input type="checkbox" name="controla_vencimiento" value="1"{% if producto.controla_vencimiento %} checked{% endif %}> Controla vencimiento</label>
+  <label><input type="checkbox" name="activo" value="1"{% if producto.activo %} checked{% endif %}> Activo</label>
+  <button type="submit">Guardar cambios</button>
+</form>
+{% else %}
+<p>Categoría: {{ producto.categoria }}{% if producto.controla_vencimiento %} · Controla vencimiento{% endif %}</p>
+{% endif %}
+{% endblock %}

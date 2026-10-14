@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Productos · {{ app_name }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Productos</h1>
+  {% if user.rol.value == "admin" %}<p><a href="/productos/nuevo" role="button">Nuevo producto</a></p>{% endif %}
+</hgroup>
+<figure>
+<table>
+  <thead>
+    <tr>
+      <th>SKU</th><th>Producto</th><th>Categoría</th><th>Unidades y precios</th>
+      {% if user.rol.value == "admin" %}<th>Costo</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in productos %}
+    <tr{% if not p.activo %} style="opacity:.5"{% endif %}>
+      <td>{{ p.sku }}</td>
+      <td><a href="/productos/{{ p.id }}">{{ p.nombre }}</a>{% if not p.activo %} (inactivo){% endif %}</td>
+      <td>{{ p.categoria }}</td>
+      <td>{% for u in p.unidades %}{{ u.nombre }}: S/ {{ "%.2f"|format(u.precio_lista) }}{% if not loop.last %} · {% endif %}{% endfor %}</td>
+      {% if user.rol.value == "admin" %}<td>S/ {{ "%.2f"|format(p.costo) }}</td>{% endif %}
+    </tr>
+  {% else %}
+    <tr><td colspan="5">Aún no hay productos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}

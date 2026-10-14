@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Nuevo producto · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Nuevo producto</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+<form method="post" action="/productos">
+  <div class="grid">
+    <label>SKU <input name="sku" value="{{ form.sku or '' }}" required></label>
+    <label>Categoría
+      <select name="categoria" required>
+        {% for c in categorias %}<option{% if form.categoria == c %} selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Nombre <input name="nombre" value="{{ form.nombre or '' }}" required></label>
+  <div class="grid">
+    <label>Unidad base (en la que se cuenta el stock)
+      <input name="unidad_base" value="{{ form.unidad_base or 'pieza' }}" required>
+    </label>
+    <label>Precio por unidad base (S/)
+      <input name="precio_base" inputmode="decimal" value="{{ form.precio_base or '' }}" required>
+    </label>
+  </div>
+  <div class="grid">
+    <label>Costo por unidad base (S/)
+      <input name="costo" inputmode="decimal" value="{{ form.costo or '0' }}">
+    </label>
+    <label>Stock mínimo (en unidad base)
+      <input name="stock_minimo" inputmode="numeric" value="{{ form.stock_minimo or '0' }}">
+    </label>
+  </div>
+  <label>m² que cubre una pieza (solo pisos y wall panels)
+    <input name="m2_por_pieza" inputmode="decimal" value="{{ form.m2_por_pieza or '' }}" placeholder="p. ej. 0.36">
+  </label>
+  <label>
+    <input type="checkbox" name="controla_vencimiento" value="1"{% if form.controla_vencimiento %} checked{% endif %}>
+    Controla fecha de vencimiento (lotes)
+  </label>
+  <button type="submit">Guardar</button>
+  <a href="/productos" role="button" class="secondary outline">Cancelar</a>
+</form>
+{% endblock %}
