@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Clientes · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Clientes</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+<form method="post" action="/clientes" class="grid">
+  <input name="nombre" placeholder="Nombre" required>
+  <input name="telefono" placeholder="Teléfono (opcional)">
+  <input name="ajuste_pct_defecto" inputmode="decimal" placeholder="Ajuste % (10 = descuento, -10 = recargo)" value="0">
+  <button type="submit">Agregar</button>
+</form>
+<figure>
+<table>
+  <thead><tr><th>Cliente</th><th>Teléfono</th><th>Ajuste general</th></tr></thead>
+  <tbody>
+  {% for c in clientes %}
+    <tr{% if not c.activo %} style="opacity:.5"{% endif %}>
+      <td><a href="/clientes/{{ c.id }}">{{ c.nombre }}</a>{% if not c.activo %} (inactivo){% endif %}</td>
+      <td>{{ c.telefono or "—" }}</td>
+      <td>
+        {% if c.ajuste_pct_defecto > 0 %}{{ "%g"|format(c.ajuste_pct_defecto) }} % de descuento
+        {% elif c.ajuste_pct_defecto < 0 %}{{ "%g"|format(-c.ajuste_pct_defecto) }} % de recargo
+        {% else %}Precio de lista{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">Aún no hay clientes.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}

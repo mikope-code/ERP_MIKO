@@ -15,7 +15,10 @@
       <ul>
         <li><a href="/productos">Productos</a></li>
         <li><a href="/stock">Stock</a></li>
-        {% if user.rol.value == "admin" %}<li><a href="/proveedores">Proveedores</a></li>{% endif %}
+        {% if user.rol.value == "admin" %}
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/proveedores">Proveedores</a></li>
+        {% endif %}
         <li>{{ user.nombre }} ({{ user.rol.value }})</li>
         <li>
           <form method="post" action="/logout" style="margin:0">

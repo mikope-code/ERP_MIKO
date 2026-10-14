@@ -34,8 +34,9 @@ Sistema web simple y de costo cero para una tienda pequeña que vende wall panel
 - **products**: id, sku, nombre, categoría, unidad_base, costo (por unidad base), stock_minimo, controla_vencimiento (bool), activo
 - **product_units**: id, product_id, nombre (caja|m²|pieza|paquete), factor_a_base (cuántas unidades base equivale), precio_lista
   - Ejemplo piso PVC: base = pieza; caja = 8; m² = 2 piezas (pieza de 0,5 m²).
-- **customers**: id, nombre, teléfono, descuento_pct_defecto
-- **customer_prices**: customer_id, product_id (o product_unit_id), descuento_pct *o* precio_especial
+- **customers**: id, nombre, teléfono, ajuste_pct_defecto (positivo = descuento, negativo = recargo), activo
+- **customer_unit_prices**: customer_id, unit_id, precio (precio fijo en una unidad concreta, p. ej. la caja)
+- **customer_product_adjustments**: customer_id, product_id, ajuste_pct (aplica a todas las unidades del producto)
 - **suppliers**: id, nombre, teléfono
 - **stock_lots**: id, product_id, cantidad_base, fecha_vencimiento (null si no aplica)
 - **stock_movements** (kardex, solo inserción): id, product_id, lot_id, tipo (entrada|salida|ajuste|anulación), cantidad_base (+/-), referencia (venta/compra), user_id, fecha, nota
@@ -47,7 +48,9 @@ Sistema web simple y de costo cero para una tienda pequeña que vende wall panel
 1. El stock **siempre se guarda en unidad base** (entero). No hay fracciones de pieza.
 2. Venta en m² (u otra unidad no entera): se **redondea hacia arriba a piezas completas**; la línea muestra los m² realmente entregados y se cobra por las piezas.
 3. Precio de línea = precio de lista de la unidad vendida, con este orden de prioridad:
-   precio especial del cliente para ese producto → descuento % del cliente para ese producto → descuento % por defecto del cliente → precio de lista.
+   precio especial del cliente para esa unidad → ajuste % del cliente para ese producto → ajuste % por defecto del cliente → precio de lista.
+   Un ajuste de 0 % explícito en un producto lo deja a precio de lista aunque el cliente tenga un ajuste general.
+   Resultados redondeados al centavo (half-up).
    Solo el admin puede sobrescribir el valor final en la venta.
 4. Se guarda el **precio real cobrado** en cada línea; cambiar la lista después no altera ventas pasadas.
 5. No se permite vender más que el stock disponible (el admin puede forzar con ajuste explícito).

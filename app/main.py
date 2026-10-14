@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.auth import CurrentUser, LoginRequired
 from app.config import settings
 from app.routers import auth as auth_router
+from app.routers import customers as customers_router
 from app.routers import products as products_router
 from app.routers import stock as stock_router
 from app.routers import suppliers as suppliers_router
@@ -27,6 +28,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.include_router(auth_router.router)
 app.include_router(products_router.router)
+app.include_router(customers_router.router)
 app.include_router(stock_router.router)
 app.include_router(suppliers_router.router)
 

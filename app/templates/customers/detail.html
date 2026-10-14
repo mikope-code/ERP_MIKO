@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ cliente.nombre }} · {{ app_name }}{% endblock %}
+{% block content %}
+<p><a href="/clientes">← Clientes</a></p>
+<h1>{{ cliente.nombre }}</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+
+<h2>Datos y ajuste general</h2>
+<form method="post" action="/clientes/{{ cliente.id }}/editar">
+  <div class="grid">
+    <label>Nombre <input name="nombre" value="{{ cliente.nombre }}" required></label>
+    <label>Teléfono <input name="telefono" value="{{ cliente.telefono or '' }}"></label>
+    <label>Ajuste % general
+      <input name="ajuste_pct_defecto" inputmode="decimal" value="{{ '%g'|format(cliente.ajuste_pct_defecto) }}">
+      <small>Positivo = descuento · negativo = recargo</small>
+    </label>
+  </div>
+  <label><input type="checkbox" name="activo" value="1"{% if cliente.activo %} checked{% endif %}> Activo</label>
+  <button type="submit">Guardar</button>
+</form>
+
+<h2>Ajuste por producto</h2>
+<p><small>Se aplica a todas las unidades del producto y reemplaza al ajuste general. Un 0 % deja ese producto a precio de lista.</small></p>
+<form method="post" action="/clientes/{{ cliente.id }}/ajustes" class="grid">
+  <select name="product_id" required>
+    <option value="">Producto…</option>
+    {% for p in productos %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}
+  </select>
+  <input name="ajuste_pct" inputmode="decimal" placeholder="% (15 = descuento, -5 = recargo)" required>
+  <button type="submit">Guardar ajuste</button>
+</form>
+{% if cliente.ajustes_producto %}
+<figure><table>
+  <tbody>
+  {% for a in cliente.ajustes_producto %}
+    <tr>
+      <td>{{ a.producto.nombre }}</td>
+      <td>{% if a.ajuste_pct >= 0 %}{{ "%g"|format(a.ajuste_pct) }} % descuento{% else %}{{ "%g"|format(-a.ajuste_pct) }} % recargo{% endif %}</td>
+      <td>
+        <form method="post" action="/clientes/{{ cliente.id }}/ajustes/{{ a.id }}/eliminar" style="margin:0">
+          <button type="submit" class="secondary outline" style="margin:0">Quitar</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></figure>
+{% endif %}
+
+<h2>Precio especial por unidad</h2>
+<p><small>Precio fijo en una unidad concreta (por ejemplo, la caja). Es la regla más fuerte.</small></p>
+<form method="post" action="/clientes/{{ cliente.id }}/precios" class="grid">
+  <select name="unit_id" required>
+    <option value="">Producto y unidad…</option>
+    {% for p in productos %}
+    <optgroup label="{{ p.nombre }}">
+      {% for u in p.unidades %}<option value="{{ u.id }}">{{ p.nombre }} — {{ u.nombre }} (lista S/ {{ "%.2f"|format(u.precio_lista) }})</option>{% endfor %}
+    </optgroup>
+    {% endfor %}
+  </select>
+  <input name="precio" inputmode="decimal" placeholder="Precio S/" required>
+  <button type="submit">Guardar precio</button>
+</form>
+{% if cliente.precios_especiales %}
+<figure><table>
+  <tbody>
+  {% for e in cliente.precios_especiales %}
+    <tr>
+      <td>{{ e.unidad.producto.nombre }} — {{ e.unidad.nombre }}</td>
+      <td>S/ {{ "%.2f"|format(e.precio) }}</td>
+      <td>
+        <form method="post" action="/clientes/{{ cliente.id }}/precios/{{ e.id }}/eliminar" style="margin:0">
+          <button type="submit" class="secondary outline" style="margin:0">Quitar</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></figure>
+{% endif %}
+
+<h2>Lo que pagaría este cliente</h2>
+<figure>
+<table>
+  <thead><tr><th>Producto</th><th>Unidad</th><th>Lista</th><th>Precio</th><th>Regla aplicada</th></tr></thead>
+  <tbody>
+  {% for p, u, r in vista %}
+    <tr>
+      <td>{{ p.nombre }}</td>
+      <td>{{ u.nombre }}</td>
+      <td>S/ {{ "%.2f"|format(r.precio_lista) }}</td>
+      <td><strong>S/ {{ "%.2f"|format(r.precio_final) }}</strong></td>
+      <td>{{ r.etiqueta }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5">No hay productos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}
