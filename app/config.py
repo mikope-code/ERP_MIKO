@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     app_name: str = "ERP MIKO"
     # Poner en true cuando se publique con HTTPS
     cookie_secure: bool = False
+    # Zona horaria con la que se muestran las fechas (se guardan en UTC)
+    timezone: str = "America/Lima"
+    # Días de anticipación para avisar de lotes por vencer
+    dias_alerta_vencimiento: int = 30
 
 
 settings = Settings()

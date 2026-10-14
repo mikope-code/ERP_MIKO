@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+﻿from decimal import Decimal, InvalidOperation
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from app.auth import AdminUser, CurrentUser
 from app.config import settings
 from app.db import get_db
+from app.forms import leer_decimal as _decimal
+from app.forms import leer_entero as _entero
 from app.models import CATEGORIAS, Product, ProductUnit, UnitKind
 from app.templating import templates
 
@@ -23,28 +25,6 @@ def _render(request: Request, user, name: str, status_code: int = 200, **ctx):
         {"app_name": settings.app_name, "user": user, "categorias": CATEGORIAS, **ctx},
         status_code=status_code,
     )
-
-
-def _decimal(valor: str, campo: str, errores: list[str], minimo: Decimal = Decimal("0")):
-    try:
-        d = Decimal(valor.strip().replace(",", "."))
-    except (InvalidOperation, AttributeError):
-        errores.append(f"{campo}: número no válido")
-        return None
-    if not d.is_finite() or d < minimo:
-        errores.append(f"{campo}: debe ser {minimo} o mayor")
-        return None
-    return d
-
-
-def _entero(valor: str, campo: str, errores: list[str], minimo: int = 0):
-    d = _decimal(valor, campo, errores, Decimal(minimo))
-    if d is None:
-        return None
-    if d != d.to_integral_value():
-        errores.append(f"{campo}: debe ser un número entero")
-        return None
-    return int(d)
 
 
 def _get_product(db: Session, product_id: int) -> Product:

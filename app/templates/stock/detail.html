@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Stock {{ producto.nombre }} · {{ app_name }}{% endblock %}
+{% block content %}
+{% set es_admin = user.rol.value == "admin" %}
+<p><a href="/stock">← Stock</a></p>
+<h1>{{ producto.nombre }}</h1>
+<p><strong>{{ texto_stock(producto, total) }}</strong> en total · mínimo {{ producto.stock_minimo }}
+  · <a href="/productos/{{ producto.id }}">Ver producto</a></p>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+
+<h2>Lotes</h2>
+<figure>
+<table>
+  <thead><tr><th>Vencimiento</th><th>Cantidad</th>{% if es_admin %}<th>Ajuste por conteo</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for l in lotes %}
+    <tr>
+      <td>
+        {% if l.fecha_vencimiento %}
+          {{ l.fecha_vencimiento.strftime("%d/%m/%Y") }}
+          {% if l.fecha_vencimiento < hoy and l.cantidad_base > 0 %}<mark>vencido</mark>{% endif %}
+        {% else %}Sin vencimiento{% endif %}
+      </td>
+      <td>{{ l.cantidad_base }} {{ producto.unidad_base }}</td>
+      {% if es_admin %}
+      <td>
+        <form method="post" action="/stock/lotes/{{ l.id }}/ajuste" style="display:flex;gap:.5rem;margin:0">
+          <input name="cantidad_contada" inputmode="numeric" placeholder="Contado" required style="margin:0">
+          <input name="nota" placeholder="Motivo" required style="margin:0">
+          <button type="submit" style="margin:0">Ajustar</button>
+        </form>
+      </td>
+      {% endif %}
+    </tr>
+  {% else %}
+    <tr><td colspan="3">Sin existencias registradas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+
+<h2>Kardex (últimos 100 movimientos)</h2>
+<figure>
+<table>
+  <thead>
+    <tr><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Vence</th><th>Usuario</th><th>Detalle</th>{% if es_admin %}<th>Costo/{{ producto.unidad_base }}</th>{% endif %}</tr>
+  </thead>
+  <tbody>
+  {% for m in movimientos %}
+    <tr>
+      <td>{{ m.fecha|local }}</td>
+      <td>{{ m.tipo.value }}</td>
+      <td>{{ "%+d"|format(m.cantidad_base) }}</td>
+      <td>{{ m.lote.fecha_vencimiento.strftime("%d/%m/%Y") if m.lote.fecha_vencimiento else "—" }}</td>
+      <td>{{ m.usuario.nombre }}</td>
+      <td>
+        {% if m.proveedor %}{{ m.proveedor.nombre }}. {% endif %}
+        {% if m.referencia %}{{ m.referencia }}. {% endif %}
+        {{ m.nota or "" }}
+      </td>
+      {% if es_admin %}<td>{{ "%.4f"|format(m.costo_unitario) if m.costo_unitario is not none else "—" }}</td>{% endif %}
+    </tr>
+  {% else %}
+    <tr><td colspan="7">Sin movimientos.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}

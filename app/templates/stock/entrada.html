@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Entrada de mercadería · {{ app_name }}{% endblock %}
+{% block content %}
+<p><a href="/stock">← Stock</a></p>
+<h1>Entrada de mercadería</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+<form method="post" action="/stock/entrada">
+  <label>Producto y unidad
+    <select name="unit_id" required>
+      <option value="">Elegir…</option>
+      {% for p in productos %}
+      <optgroup label="{{ p.nombre }}{% if p.controla_vencimiento %} (con vencimiento){% endif %}">
+        {% for u in p.unidades if u.tipo != UnitKind.AREA %}
+        <option value="{{ u.id }}"{% if form.unit_id == u.id|string %} selected{% endif %}>
+          {{ p.nombre }} — {{ u.nombre }}{% if u.tipo == UnitKind.CAJA %} ({{ u.piezas_por_unidad }} {{ p.unidad_base }}){% endif %}
+        </option>
+        {% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="grid">
+    <label>Cantidad
+      <input name="cantidad" inputmode="numeric" value="{{ form.cantidad or '' }}" required>
+    </label>
+    <label>Vencimiento (solo productos con vencimiento)
+      <input name="vencimiento" type="date" min="{{ hoy.isoformat() }}" value="{{ form.vencimiento or '' }}">
+    </label>
+  </div>
+  <div class="grid">
+    <label>Proveedor (opcional)
+      <select name="supplier_id">
+        <option value="">—</option>
+        {% for s in proveedores %}<option value="{{ s.id }}"{% if form.supplier_id == s.id|string %} selected{% endif %}>{{ s.nombre }}</option>{% endfor %}
+      </select>
+    </label>
+    {% if user.rol.value == "admin" %}
+    <label>Costo por unidad elegida (S/, opcional)
+      <input name="costo" inputmode="decimal" value="{{ form.costo or '' }}">
+    </label>
+    {% endif %}
+  </div>
+  <label>Nota (opcional) <input name="nota" maxlength="255" value="{{ form.nota or '' }}"></label>
+  <button type="submit">Registrar entrada</button>
+</form>
+{% endblock %}

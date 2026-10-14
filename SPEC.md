@@ -39,7 +39,7 @@ Sistema web simple y de costo cero para una tienda pequeña que vende wall panel
 - **suppliers**: id, nombre, teléfono
 - **stock_lots**: id, product_id, cantidad_base, fecha_vencimiento (null si no aplica)
 - **stock_movements** (kardex, solo inserción): id, product_id, lot_id, tipo (entrada|salida|ajuste|anulación), cantidad_base (+/-), referencia (venta/compra), user_id, fecha, nota
-- **purchases / purchase_lines**: entradas de mercadería con proveedor y costo
+- ~~purchases / purchase_lines~~: se simplificó (paso 4). Una entrada de mercadería es un movimiento `entrada` del kardex que lleva `supplier_id` y `costo_unitario`.
 - **sales**: id, customer_id, user_id, fecha, total, estado (activa|anulada)
 - **sale_lines**: sale_id, product_id, unit_id, cantidad_unidad, cantidad_base, precio_lista, descuento_pct, precio_final, subtotal
 

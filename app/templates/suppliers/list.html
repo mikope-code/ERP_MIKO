@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Proveedores · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Proveedores</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+<form method="post" action="/proveedores" class="grid">
+  <input name="nombre" placeholder="Nombre" required>
+  <input name="telefono" placeholder="Teléfono (opcional)">
+  <button type="submit">Agregar</button>
+</form>
+<figure>
+<table>
+  <thead><tr><th>Proveedor</th><th>Teléfono</th><th></th></tr></thead>
+  <tbody>
+  {% for p in proveedores %}
+    <tr{% if not p.activo %} style="opacity:.5"{% endif %}>
+      <td>{{ p.nombre }}{% if not p.activo %} (inactivo){% endif %}</td>
+      <td>{{ p.telefono or "—" }}</td>
+      <td>
+        <form method="post" action="/proveedores/{{ p.id }}/estado" style="margin:0">
+          <button type="submit" class="secondary outline" style="margin:0">{{ "Desactivar" if p.activo else "Activar" }}</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">Aún no hay proveedores.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}

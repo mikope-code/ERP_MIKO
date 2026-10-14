@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Stock · {{ app_name }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Stock</h1>
+  <p><a href="/stock/entrada" role="button">Registrar entrada</a></p>
+</hgroup>
+<figure>
+<table>
+  <thead>
+    <tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Alertas</th></tr>
+  </thead>
+  <tbody>
+  {% for f in filas %}
+    <tr>
+      <td><a href="/stock/{{ f.producto.id }}">{{ f.producto.nombre }}</a><br><small>{{ f.producto.sku }}</small></td>
+      <td>{{ texto_stock(f.producto, f.stock) }}</td>
+      <td>{{ f.producto.stock_minimo }}</td>
+      <td>
+        {% if f.bajo %}<mark>Stock bajo</mark> {% endif %}
+        {% if f.vencido %}<mark>{{ f.vencido }} vencido(s)</mark> {% endif %}
+        {% if f.por_vencer %}<mark>Vence {{ f.por_vencer.strftime("%d/%m/%Y") }}</mark>{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4">No hay productos. Crea uno en <a href="/productos">Productos</a>.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}
