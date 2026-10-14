@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Ingresar · {{ app_name }}{% endblock %}
+{% block content %}
+<article style="max-width: 26rem; margin: 3rem auto;">
+  <h2>{{ app_name }}</h2>
+  {% if error %}<p role="alert"><mark>{{ error }}</mark></p>{% endif %}
+  <form method="post" action="/login">
+    <label>Usuario
+      <input name="usuario" autocomplete="username" autofocus required>
+    </label>
+    <label>Contraseña
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit">Ingresar</button>
+  </form>
+</article>
+{% endblock %}

@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./erp.db"
     secret_key: str = "cambiar-en-produccion"
     app_name: str = "ERP MIKO"
+    # Poner en true cuando se publique con HTTPS
+    cookie_secure: bool = False
 
 
 settings = Settings()

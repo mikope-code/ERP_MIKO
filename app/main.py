@@ -1,17 +1,33 @@
-from pathlib import Path
-
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.auth import CurrentUser, LoginRequired
 from app.config import settings
-
-BASE_DIR = Path(__file__).resolve().parent
+from app.routers import auth as auth_router
+from app.templating import BASE_DIR, templates
 
 app = FastAPI(title=settings.app_name)
+
+# Cookie de sesión firmada. same_site=lax impide que otro sitio dispare
+# POSTs con la sesión del usuario (protección CSRF básica).
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.secret_key,
+    session_cookie="erp_session",
+    max_age=60 * 60 * 8,
+    same_site="lax",
+    https_only=settings.cookie_secure,
+)
+
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+app.include_router(auth_router.router)
+
+
+@app.exception_handler(LoginRequired)
+def _login_required(request: Request, _exc: LoginRequired):
+    return RedirectResponse("/login", status_code=303)
 
 
 @app.get("/health")
@@ -20,7 +36,7 @@ def health() -> dict[str, str]:
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def home(request: Request, user: CurrentUser):
     return templates.TemplateResponse(
-        request, "home.html", {"app_name": settings.app_name}
+        request, "home.html", {"app_name": settings.app_name, "user": user}
     )

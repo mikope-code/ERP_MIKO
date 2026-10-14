@@ -11,6 +11,16 @@
   <header class="container">
     <nav>
       <ul><li><strong>{{ app_name }}</strong></li></ul>
+      {% if user %}
+      <ul>
+        <li>{{ user.nombre }} ({{ user.rol.value }})</li>
+        <li>
+          <form method="post" action="/logout" style="margin:0">
+            <button type="submit" class="outline secondary">Salir</button>
+          </form>
+        </li>
+      </ul>
+      {% endif %}
     </nav>
   </header>
   <main class="container">

@@ -10,7 +10,14 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-Abrir http://127.0.0.1:8000
+Antes del primer arranque, crear la base de datos y el administrador:
+
+```powershell
+.\.venv\Scripts\alembic.exe upgrade head
+.\.venv\Scripts\python.exe -m app.cli crear-usuario dueno "Nombre Dueño" --rol admin
+```
+
+Abrir http://127.0.0.1:8000 e ingresar con ese usuario. Los empleados se crean igual con `--rol empleado`.
 
 ## Comandos útiles
 
