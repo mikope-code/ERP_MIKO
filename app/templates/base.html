@@ -20,6 +20,7 @@
         {% if user.rol.value == "admin" %}
         <li><a href="/clientes">Clientes</a></li>
         <li><a href="/proveedores">Proveedores</a></li>
+        <li><a href="/exportar">Exportar</a></li>
         {% endif %}
         <li>{{ user.nombre }} ({{ user.rol.value }})</li>
         <li>

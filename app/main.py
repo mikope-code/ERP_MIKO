@@ -11,6 +11,7 @@ from app.config import settings
 from app.db import get_db
 from app.routers import auth as auth_router
 from app.routers import customers as customers_router
+from app.routers import exports as exports_router
 from app.routers import products as products_router
 from app.routers import sales as sales_router
 from app.routers import stock as stock_router
@@ -35,6 +36,7 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 app.include_router(auth_router.router)
 app.include_router(products_router.router)
 app.include_router(customers_router.router)
+app.include_router(exports_router.router)
 app.include_router(sales_router.router)
 app.include_router(stock_router.router)
 app.include_router(suppliers_router.router)

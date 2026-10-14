@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     # Zona horaria con la que se muestran las fechas (se guardan en UTC)
     timezone: str = "America/Lima"
+    # Separador de los CSV exportados: "," o ";" según la configuración regional de Excel
+    csv_delimiter: str = ","
     # Días de anticipación para avisar de lotes por vencer
     dias_alerta_vencimiento: int = 30
 

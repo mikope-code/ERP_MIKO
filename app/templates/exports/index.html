@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Exportar · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Exportar a Excel (CSV)</h1>
+<p><small>Los archivos se abren directamente en Excel. Incluyen costos, por eso esta pantalla es solo del administrador.</small></p>
+
+<article>
+  <h3>Productos y precios</h3>
+  <p>Una fila por unidad de venta, con costo y precio de lista.</p>
+  <a href="/exportar/productos.csv" role="button">Descargar productos</a>
+</article>
+
+<article>
+  <h3>Stock actual</h3>
+  <p>Una fila por lote, con vencimiento y estado (vigente, vencido).</p>
+  <a href="/exportar/stock.csv" role="button">Descargar stock</a>
+</article>
+
+<article>
+  <h3>Ventas</h3>
+  <p>Una fila por producto vendido, con precios cobrados. Incluye las anuladas con su estado.</p>
+  <form method="get" action="/exportar/ventas.csv" class="grid">
+    <label>Desde <input type="date" name="desde"></label>
+    <label>Hasta <input type="date" name="hasta"></label>
+    <button type="submit" style="align-self:end">Descargar ventas</button>
+  </form>
+</article>
+
+<article>
+  <h3>Kardex de stock</h3>
+  <p>Todos los movimientos: entradas, salidas, ajustes y anulaciones.</p>
+  <form method="get" action="/exportar/kardex.csv" class="grid">
+    <label>Desde <input type="date" name="desde"></label>
+    <label>Hasta <input type="date" name="hasta"></label>
+    <button type="submit" style="align-self:end">Descargar kardex</button>
+  </form>
+</article>
+{% endblock %}
