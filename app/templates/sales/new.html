@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Nueva venta · {{ app_name }}{% endblock %}
+{% block content %}
+<p><a href="/ventas">← Ventas</a></p>
+<h1>Nueva venta</h1>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+<form id="venta-form" method="post" action="/ventas"
+      hx-post="/ventas/previa" hx-trigger="change, input delay:500ms" hx-target="#previa" hx-swap="innerHTML">
+  <label>Cliente
+    <select name="cliente_id">
+      <option value="">Mostrador (sin cliente)</option>
+      {% for c in clientes %}<option value="{{ c.id }}"{% if form.cliente_id == c.id|string %} selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+  </label>
+
+  <div id="lineas">
+    {% include "sales/_linea.html" %}
+  </div>
+  <button type="button" class="outline"
+          hx-post="/ventas/linea" hx-target="#lineas" hx-swap="beforeend">+ Agregar producto</button>
+
+  <div id="previa" aria-live="polite"></div>
+
+  <label>Nota (opcional) <input name="nota" maxlength="255" value="{{ form.nota or '' }}"></label>
+  <button type="submit">Registrar venta</button>
+</form>
+{% endblock %}

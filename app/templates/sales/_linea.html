@@ -1,0 +1,18 @@
+<div class="linea grid">
+  <select name="unit_id" aria-label="Producto y unidad">
+    <option value="">Producto…</option>
+    {% for p in productos %}
+    <optgroup label="{{ p.nombre }}">
+      {% for u in p.unidades %}
+      <option value="{{ u.id }}">{{ p.nombre }} — {{ u.nombre }}{% if u.tipo.value == "caja" %} ({{ u.piezas_por_unidad }} {{ p.unidad_base }}){% endif %}</option>
+      {% endfor %}
+    </optgroup>
+    {% endfor %}
+  </select>
+  <input name="cantidad" inputmode="decimal" placeholder="Cantidad" aria-label="Cantidad">
+  {% if user.rol.value == "admin" %}
+  <input name="precio" inputmode="decimal" placeholder="Precio (opcional)" aria-label="Precio manual">
+  {% endif %}
+  <button type="button" class="secondary outline" aria-label="Quitar línea"
+          onclick="var f=document.getElementById('venta-form');this.closest('.linea').remove();htmx.trigger(f,'change')">✕</button>
+</div>

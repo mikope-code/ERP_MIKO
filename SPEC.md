@@ -41,8 +41,9 @@ Sistema web simple y de costo cero para una tienda pequeña que vende wall panel
 - **stock_lots**: id, product_id, cantidad_base, fecha_vencimiento (null si no aplica)
 - **stock_movements** (kardex, solo inserción): id, product_id, lot_id, tipo (entrada|salida|ajuste|anulación), cantidad_base (+/-), referencia (venta/compra), user_id, fecha, nota
 - ~~purchases / purchase_lines~~: se simplificó (paso 4). Una entrada de mercadería es un movimiento `entrada` del kardex que lleva `supplier_id` y `costo_unitario`.
-- **sales**: id, customer_id, user_id, fecha, total, estado (activa|anulada)
-- **sale_lines**: sale_id, product_id, unit_id, cantidad_unidad, cantidad_base, precio_lista, descuento_pct, precio_final, subtotal
+- **sales**: id, customer_id (NULL = mostrador), user_id, fecha, total, estado (activa|anulada), nota, anulada_por_id, anulada_en, motivo_anulacion
+- **sale_lines**: sale_id, product_id, unit_id, cantidad_pedida (en la unidad elegida), cantidad_base (piezas que salen del stock), cantidad_cobrada (en m² son los realmente entregados), precio_lista, ajuste_pct, precio_unitario, precio_manual, subtotal
+- Los movimientos de una venta llevan `referencia = "venta-<id>"` en el kardex; la anulación los revierte lote por lote.
 
 ## 5. Reglas de negocio
 1. El stock **siempre se guarda en unidad base** (entero). No hay fracciones de pieza.

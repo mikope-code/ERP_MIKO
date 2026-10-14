@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Venta {{ venta.id }} · {{ app_name }}{% endblock %}
+{% block content %}
+{% set es_admin = user.rol.value == "admin" %}
+<p><a href="/ventas">← Ventas</a></p>
+<h1>Venta N° {{ venta.id }}
+  {% if venta.estado == SaleStatus.ANULADA %}<mark>Anulada</mark>{% endif %}</h1>
+<p>
+  {{ venta.fecha|local }} · {{ venta.cliente.nombre if venta.cliente else "Mostrador" }}
+  · Atendió {{ venta.usuario.nombre }}
+  {% if venta.nota %}<br><small>Nota: {{ venta.nota }}</small>{% endif %}
+</p>
+{% if errores %}
+<article><ul>{% for e in errores %}<li><mark>{{ e }}</mark></li>{% endfor %}</ul></article>
+{% endif %}
+
+<figure>
+<table>
+  <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+  <tbody>
+  {% for l in venta.lineas %}
+    <tr>
+      <td>{{ l.producto.nombre }} — {{ l.unidad.nombre }}</td>
+      <td>
+        {% if l.unidad.tipo.value == "area" %}
+          {{ "%g"|format(l.cantidad_pedida) }} m² pedidos<br>
+          <small>{{ l.cantidad_base }} {{ l.producto.unidad_base }} = {{ "%.2f"|format(l.cantidad_cobrada) }} m²</small>
+        {% else %}
+          {{ "%g"|format(l.cantidad_pedida) }} {{ l.unidad.nombre }}
+          {% if l.unidad.tipo.value == "caja" %}<br><small>{{ l.cantidad_base }} {{ l.producto.unidad_base }}</small>{% endif %}
+        {% endif %}
+      </td>
+      <td>
+        S/ {{ "%.2f"|format(l.precio_unitario) }}
+        {% if es_admin %}
+          <br><small>
+            {% if l.precio_manual %}precio manual
+            {% elif l.ajuste_pct != 0 %}lista S/ {{ "%.2f"|format(l.precio_lista) }} ({{ "%+g"|format(-l.ajuste_pct) }} %)
+            {% else %}lista{% endif %}
+          </small>
+        {% endif %}
+      </td>
+      <td>S/ {{ "%.2f"|format(l.subtotal) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot><tr><th colspan="3">Total</th><th>S/ {{ "%.2f"|format(venta.total) }}</th></tr></tfoot>
+</table>
+</figure>
+
+{% if venta.estado == SaleStatus.ANULADA %}
+<p>Anulada por {{ venta.anulada_por.nombre }} el {{ venta.anulada_en|local }}.<br>
+  Motivo: {{ venta.motivo_anulacion }}</p>
+{% elif es_admin %}
+<details>
+  <summary role="button" class="secondary outline">Anular venta</summary>
+  <form method="post" action="/ventas/{{ venta.id }}/anular">
+    <label>Motivo <input name="motivo" required maxlength="255"></label>
+    <button type="submit">Anular y reponer stock</button>
+  </form>
+</details>
+{% endif %}
+{% endblock %}

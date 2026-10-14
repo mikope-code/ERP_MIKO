@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Ventas · {{ app_name }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>Ventas</h1>
+  <p><a href="/ventas/nueva" role="button">Nueva venta</a></p>
+</hgroup>
+<figure>
+<table>
+  <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Estado</th></tr></thead>
+  <tbody>
+  {% for v in ventas %}
+    <tr{% if v.estado == SaleStatus.ANULADA %} style="opacity:.55"{% endif %}>
+      <td><a href="/ventas/{{ v.id }}">{{ v.id }}</a></td>
+      <td>{{ v.fecha|local }}</td>
+      <td>{{ v.cliente.nombre if v.cliente else "Mostrador" }}</td>
+      <td>{{ v.usuario.nombre }}</td>
+      <td>S/ {{ "%.2f"|format(v.total) }}</td>
+      <td>{% if v.estado == SaleStatus.ANULADA %}<mark>Anulada</mark>{% else %}Activa{% endif %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6">Aún no hay ventas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</figure>
+{% endblock %}
