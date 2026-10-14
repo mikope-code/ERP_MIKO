@@ -1,5 +1,79 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ app_name }}</h1>
-<p>Inventario y ventas. El sistema está en construcción.</p>
+<h1>Hola, {{ user.nombre }}</h1>
+<p class="grid">
+  <a href="/ventas/nueva" role="button">Nueva venta</a>
+  <a href="/stock/entrada" role="button" class="secondary">Registrar entrada</a>
+</p>
+
+<section class="grid">
+  <article>
+    <header>Ventas de hoy</header>
+    <h2 style="margin-bottom:0">S/ {{ "%.2f"|format(r.ventas.total) }}</h2>
+    <p>
+      {{ r.ventas.cantidad }} venta{{ "" if r.ventas.cantidad == 1 else "s" }}
+      {% if r.ventas.anuladas %}· <mark>{{ r.ventas.anuladas }} anulada{{ "" if r.ventas.anuladas == 1 else "s" }}</mark>{% endif %}
+      · <a href="/ventas">ver historial</a>
+    </p>
+  </article>
+
+  <article>
+    <header>Alertas</header>
+    <p style="margin-bottom:0">
+      {% if r.stock_bajo %}<mark>{{ r.stock_bajo|length }} con stock bajo</mark><br>{% endif %}
+      {% if r.vencidos %}<mark>{{ r.vencidos|length }} lote(s) vencido(s)</mark><br>{% endif %}
+      {% if r.por_vencer %}<mark>{{ r.por_vencer|length }} lote(s) por vencer</mark>{% endif %}
+      {% if not r.stock_bajo and not r.vencidos and not r.por_vencer %}Todo en orden.{% endif %}
+    </p>
+  </article>
+</section>
+
+{% if r.vencidos %}
+<h2>Lotes vencidos</h2>
+<p><small>No se venden. Cuando los retires, dalos de baja con un ajuste de stock.</small></p>
+<figure><table>
+  <thead><tr><th>Producto</th><th>Venció</th><th>Cantidad</th></tr></thead>
+  <tbody>
+  {% for a in r.vencidos %}
+    <tr>
+      <td><a href="/stock/{{ a.producto.id }}">{{ a.producto.nombre }}</a></td>
+      <td>{{ a.vencimiento.strftime("%d/%m/%Y") }} (hace {{ -a.dias }} día{{ "" if a.dias == -1 else "s" }})</td>
+      <td>{{ a.cantidad }} {{ a.producto.unidad_base }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></figure>
+{% endif %}
+
+{% if r.por_vencer %}
+<h2>Por vencer</h2>
+<figure><table>
+  <thead><tr><th>Producto</th><th>Vence</th><th>Cantidad</th></tr></thead>
+  <tbody>
+  {% for a in r.por_vencer %}
+    <tr>
+      <td><a href="/stock/{{ a.producto.id }}">{{ a.producto.nombre }}</a></td>
+      <td>{{ a.vencimiento.strftime("%d/%m/%Y") }} ({{ "hoy" if a.dias == 0 else "en " ~ a.dias ~ " día" ~ ("" if a.dias == 1 else "s") }})</td>
+      <td>{{ a.cantidad }} {{ a.producto.unidad_base }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></figure>
+{% endif %}
+
+{% if r.stock_bajo %}
+<h2>Stock bajo</h2>
+<figure><table>
+  <thead><tr><th>Producto</th><th>Stock</th><th>Mínimo</th></tr></thead>
+  <tbody>
+  {% for b in r.stock_bajo %}
+    <tr>
+      <td><a href="/stock/{{ b.producto.id }}">{{ b.producto.nombre }}</a></td>
+      <td>{% if b.stock == 0 %}<mark>Agotado</mark>{% else %}{{ texto_stock(b.producto, b.stock) }}{% endif %}</td>
+      <td>{{ b.producto.stock_minimo }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></figure>
+{% endif %}
 {% endblock %}

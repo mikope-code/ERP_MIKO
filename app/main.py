@@ -1,16 +1,21 @@
-from fastapi import FastAPI, Request
+﻿from typing import Annotated
+
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth import CurrentUser, LoginRequired
 from app.config import settings
+from app.db import get_db
 from app.routers import auth as auth_router
 from app.routers import customers as customers_router
 from app.routers import products as products_router
 from app.routers import sales as sales_router
 from app.routers import stock as stock_router
 from app.routers import suppliers as suppliers_router
+from app.services.dashboard import resumen
 from app.templating import BASE_DIR, templates
 
 app = FastAPI(title=settings.app_name)
@@ -46,7 +51,10 @@ def health() -> dict[str, str]:
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, user: CurrentUser):
+def home(request: Request, user: CurrentUser, db: Annotated[Session, Depends(get_db)]):
     return templates.TemplateResponse(
-        request, "home.html", {"app_name": settings.app_name, "user": user}
+        request,
+        "home.html",
+        {"app_name": settings.app_name, "user": user, "r": resumen(db)},
     )
+

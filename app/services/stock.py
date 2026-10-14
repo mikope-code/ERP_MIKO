@@ -1,4 +1,4 @@
-"""Reglas de stock. Toda cantidad está en piezas (unidad base) y es entera.
+﻿"""Reglas de stock. Toda cantidad está en piezas (unidad base) y es entera.
 
 Las funciones hacen `flush` pero no `commit`: quien las llama decide cuándo
 confirmar, para que una venta o entrada completa sea una sola transacción.
@@ -9,6 +9,7 @@ from decimal import Decimal
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
+from app.clock import hoy_local
 
 from app.models import (
     MovementType,
@@ -82,7 +83,7 @@ def registrar_entrada(
     if producto.controla_vencimiento:
         if vencimiento is None:
             raise StockError(f"{producto.nombre} requiere fecha de vencimiento")
-        if vencimiento < (hoy or date.today()):
+        if vencimiento < (hoy or hoy_local()):
             raise StockError("La fecha de vencimiento ya pasó")
     else:
         vencimiento = None
@@ -130,7 +131,7 @@ def stock_total(db: Session, product_id: int) -> int:
 
 def stock_vendible(db: Session, product_id: int, hoy: date | None = None) -> int:
     """Lo que se puede vender: excluye lotes vencidos."""
-    hoy = hoy or date.today()
+    hoy = hoy or hoy_local()
     sub = _lotes_vendibles(product_id, hoy).subquery()
     return db.scalar(select(func.coalesce(func.sum(sub.c.cantidad_base), 0)))
 
@@ -151,7 +152,7 @@ def registrar_salida(
     """
     if piezas <= 0:
         raise CantidadInvalida("La cantidad debe ser mayor que cero")
-    hoy = hoy or date.today()
+    hoy = hoy or hoy_local()
 
     lotes = db.scalars(
         _lotes_vendibles(producto.id, hoy)

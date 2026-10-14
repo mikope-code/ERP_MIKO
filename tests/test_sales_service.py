@@ -1,8 +1,9 @@
-from datetime import date, timedelta
+﻿from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
 from sqlalchemy import select
+from app.clock import hoy_local
 
 from app.models import (
     Customer,
@@ -32,7 +33,7 @@ from app.services.stock import (
 from tests.conftest import make_user
 
 D = Decimal
-HOY = date.today()
+HOY = hoy_local()
 
 
 @pytest.fixture()

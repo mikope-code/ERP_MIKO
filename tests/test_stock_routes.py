@@ -1,7 +1,8 @@
-from datetime import date, timedelta
+﻿from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import select
+from app.clock import hoy_local
 
 from app.models import Product, ProductUnit, StockLot, StockMovement, Supplier, UnitKind
 from app.services.stock import stock_total
@@ -85,7 +86,7 @@ def test_admin_registra_costo_y_proveedor(client, admin, catalogo, db_session):
 def test_entrada_con_vencimiento(client, empleado, catalogo, db_session):
     _, peg = catalogo
     login(client, "ana")
-    venc = (date.today() + timedelta(days=90)).isoformat()
+    venc = (hoy_local() + timedelta(days=90)).isoformat()
     r = client.post(
         "/stock/entrada",
         data=dict(unit_id=unit(peg, "unidad").id, cantidad="6", vencimiento=venc),
@@ -141,7 +142,7 @@ def test_resumen_muestra_cajas_y_sueltas(client, empleado, catalogo):
 def test_resumen_avisa_vencimiento_cercano(client, empleado, catalogo):
     _, peg = catalogo
     login(client, "ana")
-    cerca = (date.today() + timedelta(days=10)).isoformat()
+    cerca = (hoy_local() + timedelta(days=10)).isoformat()
     client.post(
         "/stock/entrada",
         data=dict(unit_id=unit(peg, "unidad").id, cantidad="5", vencimiento=cerca),

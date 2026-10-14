@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from app.clock import hoy_local
 
 from app.auth import AdminUser, CurrentUser
 from app.config import settings
@@ -23,7 +24,7 @@ def _render(request: Request, user, name: str, status_code: int = 200, **ctx):
     return templates.TemplateResponse(
         request,
         name,
-        {"app_name": settings.app_name, "user": user, "hoy": date.today(), **ctx},
+        {"app_name": settings.app_name, "user": user, "hoy": hoy_local(), **ctx},
         status_code=status_code,
     )
 
@@ -51,7 +52,7 @@ def _form_entrada(request, user, db, status_code=200, errores=None, form=None):
 
 @router.get("", response_class=HTMLResponse)
 def resumen(request: Request, user: CurrentUser, db: DB):
-    hoy = date.today()
+    hoy = hoy_local()
     limite = hoy + timedelta(days=settings.dias_alerta_vencimiento)
     productos = db.scalars(
         select(Product).where(Product.activo.is_(True)).order_by(Product.categoria, Product.nombre)
